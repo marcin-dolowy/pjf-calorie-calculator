@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<h1 style="text-align: justify; color: blue;">Create an Account</h1>
+<br>
+<form action="" method="post">
+    {{ form.hidden_tag() }}
+    <div>
+        {{ form.firstname(placeholder="First Name",
+      style='width: 50%;
+      font-weight: bold;
+      padding: 12px 20px ;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box') }}
+        {% for error in form.firstname.errors %}
+            <p>{{ error }}</p>
+        {% endfor %}
+    </div>
+    <br>
+    <div>
+        {{ form.lastname(placeholder="Last Name",
+      style='width: 50%;
+      font-weight: bold;
+      padding: 12px 20px ;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box') }}
+        {% for error in form.lastname.errors %}
+            <p>{{ error }}</p>
+        {% endfor %}
+    </div>
+    <br>
+    <div>
+        {{ form.username(placeholder="Username",
+      style='width: 50%;
+      font-weight: bold;
+      padding: 12px 20px ;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box') }}
+        {% for error in form.username.errors %}
+            <p>{{ error }}</p>
+        {% endfor %}
+    </div>
+    <br>
+    <div>
+        {{ form.password1(placeholder="Password",
+      style='width: 50%;
+      font-weight: bold;
+      padding: 12px 20px ;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box') }}
+        {% for error in form.password1.errors %}
+            <p>{{ error }}</p>
+        {% endfor %}
+    </div>
+    <br>
+    <div>
+        {{ form.password2(placeholder="Confirm password",
+      style='width: 50%;
+      font-weight: bold;
+      padding: 12px 20px ;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box') }}
+        {% for error in form.password2.errors %}
+            <p>{{ error }}</p>
+        {% endfor %}
+    </div>
+    <br>
+    <div>
+        {{ form.date_of_birth(
+      style='width: 50%;
+      font-weight: bold;
+      padding: 12px 20px ;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box') }}
+        {% for error in form.date_of_birth.errors %}
+            <p>{{ error }}</p>
+        {% endfor %}
+    </div>
+    <br>
+    <div>
+        {{ form.weight(placeholder="Weight [kg]",
+      style='width: 50%;
+      font-weight: bold;
+      padding: 12px 20px ;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box') }}
+        {% for error in form.weight.errors %}
+            <p>{{ error }}</p>
+        {% endfor %}
+    </div>
+    <br>
+    <div>
+        {{ form.height(placeholder="Height [cm]",
+      style='width: 50%;
+      font-weight: bold;
+      padding: 12px 20px ;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box') }}
+        {% for error in form.height.errors %}
+            <p>{{ error }}</p>
+        {% endfor %}
+    </div>
+    <br>
+    <div>
+        {% for subfield in form.sex %}
+            <tr>
+                <td>{{ subfield }}</td>
+                <td>{{ subfield.label }}</td>
+            </tr>
+        {% endfor %}
+
+    </div>
+    <br>
+    <div>{{ form.submit(
+      style ='background-color: #4CAF50;
+      color: white;
+      width: 50%;
+      padding: 14px 20px;
+      margin: 8px 0;
+      border: none;
+      border-radius: 4px') }}
+    </div>
+</form>
+<p></p>
+<h3 style="color: blue; margin-left:100px;"><a href="{{ url_for('login') }}">Already have an account?</a></h3>
