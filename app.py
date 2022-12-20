@@ -114,6 +114,11 @@ def logout():
     return redirect(url_for('login'))
 
 
+@app.route('/')
+def start():
+    return render_template("base.html")
+
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
     form = RegistrationForm()
@@ -150,7 +155,7 @@ def home(username):
     if not current_user.is_anonymous:
         user = User.query.filter_by(username=username).first()
         print(user)
-        return render_template("Home.html", username=username, calorie=user.max_calorie)
+        return render_template("newhome.html", username=username, calorie=user.max_calorie)
 
 
 @app.route("/recipe", methods=['GET', 'POST'])
@@ -162,7 +167,9 @@ def recipe():
         print(recipes["to"])
         for x in range(recipes["to"]):
             ingredients_list = recipes["hits"][x]["recipe"]["ingredientLines"]
-            ingredients_str = ', '.join(str(x) for x in ingredients_list)
+            ingredients_str = '\n'.join(str(x) for x in ingredients_list)
+            ingredients_str = ingredients_str.replace('\n', '<br />')
+
             new_recipe = Recipe(name=recipes["hits"][x]["recipe"]["label"], products=form.products.data,
                                 image=recipes["hits"][x]["recipe"]["image"], ingredients=ingredients_str)
             db.session.add(new_recipe)
@@ -172,7 +179,7 @@ def recipe():
 
     all_recipes = Recipe.query.all()
 
-    return render_template("recipe.html", form=form, all_recipes=all_recipes)
+    return render_template("newrecipe.html", form=form, all_recipes=all_recipes)
 
 
 def calculate_age(born):
@@ -207,65 +214,62 @@ def load_recipes(products):
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
 
-# products = load_recipes("chocolate, flour, cacao, egg")
+    # products = load_recipes("chocolate, flour, cacao, egg")
 
+    # jstr = json.dumps(productsa, ensure_ascii=True, indent=4)
 
-# jstr = json.dumps(productsa, ensure_ascii=True, indent=4)
+    # print(jstr)
 
-# print(jstr)
+    # product = json.dumps(products)
 
-# product = json.dumps(products)
+    # print(product)
 
-# print(product)
+    # print(products)
 
+    # json_encode = jstr.encode("ascii", "ignore")
+    # json_decode = json_encode.decode()
 
-# print(products)
+    # products = json.loads(json_decode)
 
-# json_encode = jstr.encode("ascii", "ignore")
-# json_decode = json_encode.decode()
+    # print(json_decode)
 
-# products = json.loads(json_decode)
+    # print(json_good)
 
-# print(json_decode)
+    # products = json.loads(jstr)
 
-# print(json_good)
+    #
+    # for x in range(products["to"]):
+    #     print(products["hits"][x]["recipe"]["label"])
+    #     print(products["hits"][x]["recipe"]["image"])
+    #     print(products["hits"][x]["recipe"]["ingredientLines"])
 
-# products = json.loads(jstr)
+    # food = load_food("100 grams of oatmeal")
+    # with open('data.json', 'w', encoding='utf-8') as f:
+    #     json.dump(food, f, ensure_ascii=False, indent=4)
 
-#
-# for x in range(products["to"]):
-#     print(products["hits"][x]["recipe"]["label"])
-#     print(products["hits"][x]["recipe"]["image"])
-#     print(products["hits"][x]["recipe"]["ingredientLines"])
+    # print(food["cautions"])
 
-# food = load_food("100 grams of oatmeal")
-# with open('data.json', 'w', encoding='utf-8') as f:
-#     json.dump(food, f, ensure_ascii=False, indent=4)
+    # print(food["calories"])
+    # print("fat = ", food["totalNutrients"]["FAT"])
+    # print("wegle = ", food["totalNutrients"]["CHOCDF"])
+    # print("bialko = ", food["totalNutrients"]["PROCNT"])
+    #
 
-# print(food["cautions"])
+    # user = User("admin", "admin", "abc", "abc", date(2000, 5, 14), "Male", None, 90, 178)
+    # user.max_calorie = max_calorie_per_day(user)
+    # print("wiek", calculate_age(user.date_of_birth))
+    # print(user.max_calorie)
+    # print(user)
+    # print(max_calorie_per_day(60, 25, 165))
 
+    # nutrient = [food["calories"], food["totalNutrients"]["FAT"], food["totalNutrients"]["CHOCDF"],
+    #             food["totalNutrients"]["PROCNT"]]
 
-# print(food["calories"])
-# print("fat = ", food["totalNutrients"]["FAT"])
-# print("wegle = ", food["totalNutrients"]["CHOCDF"])
-# print("bialko = ", food["totalNutrients"]["PROCNT"])
-#
-
-# user = User("admin", "admin", "abc", "abc", date(2000, 5, 14), "Male", None, 90, 178)
-# user.max_calorie = max_calorie_per_day(user)
-# print("wiek", calculate_age(user.date_of_birth))
-# print(user.max_calorie)
-# print(user)
-# print(max_calorie_per_day(60, 25, 165))
-
-# nutrient = [food["calories"], food["totalNutrients"]["FAT"], food["totalNutrients"]["CHOCDF"],
-#             food["totalNutrients"]["PROCNT"]]
-
-# plain_password = 'qwerty'
-# hashed_password = generate_password_hash(plain_password)
-# submitted_password = 'qwerty'
-# matching_password = check_password_hash(hashed_password, submitted_password)
-# print(matching_password)
-# print(hashed_password)
+    # plain_password = 'qwerty'
+    # hashed_password = generate_password_hash(plain_password)
+    # submitted_password = 'qwerty'
+    # matching_password = check_password_hash(hashed_password, submitted_password)
+    # print(matching_password)
+    # print(hashed_password)
