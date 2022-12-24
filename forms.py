@@ -26,4 +26,11 @@ class LoginForm(FlaskForm):
 
 class RecipeForm(FlaskForm):
     products = StringField("Products", validators=[DataRequired()])
-    submit = SubmitField('Find')
+    submit = SubmitField('Search')
+
+
+class FoodForm(FlaskForm):
+    name = StringField("Name", validators=[DataRequired()])
+    submit = SubmitField('Search')
+
+
