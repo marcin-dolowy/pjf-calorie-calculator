@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <div class="container text-center">
+        <div class="row">
+            <div class="col">
+                <h2>Hello!</h2>
+                <div>
+                    <h3> {{ name_surname }}</h3>
+                </div>
+            </div>
+
+
+            <div class="col">
+
+                <form action="" method="post">
+
+                    {{ form.hidden_tag() }}
+
+                    <div class="col" align="center">
+                        <br>
+                        {{ form.name(placeholder="e.g. 100 grams of oatmeal", class="form-control", style="width: 600px") }}
+
+                        {% for error in form.name.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+
+                        <br>
+
+                        <p>{{ form.submit(class="btn btn-success", style="width: 300px") }}
+                        </p>
+                    </div>
+
+                </form>
+
+            </div>
+            <div class="col">
+                <h4>MAX CALORIES</h4>
+                <h3 style="color: green">{{ max_calorie }}</h3>
+                <h4>CALORIES REMAINING</h4>
+                {% if remaining_calories < 0 %}
+                <h3 style="color: red"> {{ remaining_calories }}</h3>
+                {% else %}
+                <h3 style="color: green"> {{ remaining_calories }}</h3>
+                <br>
+                {% endif %}
+            </div>
+        </div>
+        <div class="row">
+
+            <div class="col-8">
+
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Calories [kcal]</th>
+                        <th scope="col">Protein [g]</th>
+                        <th scope="col">Fat [g]</th>
+                        <th scope="col">Carbohydrate [g]</th>
+                        <th scope="col">Remove</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for food in all_foods %}
+                        <tr>
+                            <th scope="row">{{ food.name }}</th>
+                            <td>{{ food.calories }}</td>
+                            <td>{{ food.protein }}</td>
+                            <td> {{ food.fat }}</td>
+                            <td>{{ food.carbohydrates }}</td>
+                            <td>
+                                <a href="{{ url_for('delete', id=food.id) }}" class="btn btn-danger">Remove</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+            <div class="col-4">
+
+                <div>
+                    <h3>MACRO-NUTRIENT SUMMARY</h3>
+                </div>
+
+                <table class="table table-bordered" style="width:100%">
+                    <tr>
+                        <th scope="row">Proteins [g]:</th>
+                        <td>{{ all_protein }}</td>
+                    </tr>
+                    <tr>
+                        <th>Fat [g]:</th>
+                        <td>{{ all_fat }}</td>
+                    </tr>
+                    <tr>
+                        <th>Carbohydrates [g]:</th>
+                        <td>{{ all_carbohydrates }}</td>
+                    </tr>
+                </table>
+
+
+            </div>
+        </div>
+    </div>
+
+    {#    <script>#}
+    {#        function removeRow(button) {#}
+    {#            var row = button.parentNode.parentNode;#}
+    {#            var table = row.parentNode;#}
+    {#            table.removeChild(row);#}
+    {#        }#}
+    {#    </script>#}
+
+    {#<button class="btn btn-danger" type="button" name="remove" onclick="removeRow(this)">Remove#}
+    {#                                </button>#}
+
+{% endblock %}
