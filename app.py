@@ -128,6 +128,13 @@ def home():
             db.session.commit()
             return redirect(url_for('home'))
 
+    name_surname = " ".join([current_user.firstname, current_user.lastname])
+
+    all_calories = Food.query.filter(Food.user_id == current_user.id).with_entities(
+        func.sum(Food.calories).label('total')).first().total or 0
+
+    remaining_calories = current_user.max_calorie - all_calories
+
     all_foods = Food.query.filter(Food.user_id == current_user.id)
 
     all_protein = Food.query.filter(Food.user_id == current_user.id).with_entities(
@@ -141,13 +148,6 @@ def home():
     all_carbohydrates = Food.query.filter(Food.user_id == current_user.id).with_entities(
         func.sum(Food.carbohydrates).label('total')).first().total or 0
     all_carbohydrates = 0 if all_carbohydrates is None else round(all_carbohydrates, 2)
-
-    all_calories = Food.query.filter(Food.user_id == current_user.id).with_entities(
-        func.sum(Food.calories).label('total')).first().total or 0
-
-    remaining_calories = current_user.max_calorie - all_calories
-
-    name_surname = " ".join([current_user.firstname, current_user.lastname])
 
     return render_template("home.html", form=form, name_surname=name_surname, max_calorie=current_user.max_calorie,
                            remaining_calories=remaining_calories, all_foods=all_foods, all_protein=all_protein,
@@ -161,6 +161,13 @@ def delete(id):
 
     form = FoodForm()
 
+    name_surname = " ".join([current_user.firstname, current_user.lastname])
+
+    all_calories = Food.query.filter(Food.user_id == current_user.id).with_entities(
+        func.sum(Food.calories).label('total')).first().total or 0
+
+    remaining_calories = current_user.max_calorie - all_calories
+
     all_foods = Food.query.filter(Food.user_id == current_user.id)
 
     all_protein = Food.query.filter(Food.user_id == current_user.id).with_entities(
@@ -175,14 +182,6 @@ def delete(id):
         func.sum(Food.carbohydrates).label('total')).first().total or 0
     all_carbohydrates = 0 if all_carbohydrates is None else round(all_carbohydrates, 2)
 
-    all_calories = Food.query.filter(Food.user_id == current_user.id).with_entities(
-        func.sum(Food.calories).label('total')).first().total or 0
-
-    remaining_calories = current_user.max_calorie - all_calories
-
-    name_surname = " ".join([current_user.firstname, current_user.lastname])
-
-    # try:
     db.session.delete(food_to_delete)
     db.session.commit()
     flash("Food was removed successfully!")
@@ -190,15 +189,6 @@ def delete(id):
     return render_template("home.html", form=form, name_surname=name_surname, max_calorie=current_user.max_calorie,
                            remaining_calories=remaining_calories, all_foods=all_foods, all_protein=all_protein,
                            all_fat=all_fat, all_carbohydrates=all_carbohydrates)
-
-    # except:
-    #     flash("There was a problem. Try one's again")
-    #     return render_template("home.html", form=form, name_surname=name_surname,
-    #                            max_calorie=current_user.max_calorie,
-    #                            remaining_calories=remaining_calories,
-    #                            all_foods=all_foods,
-    #                            all_protein=all_protein, all_fat=all_fat,
-    #                            all_carbohydrates=all_carbohydrates)
 
 
 @app.route('/login', methods=["GET", "POST"])
