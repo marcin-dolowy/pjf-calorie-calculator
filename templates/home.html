@@ -9,6 +9,9 @@
                 <div>
                     <h3> {{ name_surname }}</h3>
                 </div>
+                {% for message in get_flashed_messages() %}
+                    <p style="color: red;">{{ message }}</p>
+                {% endfor %}
             </div>
 
 
@@ -40,10 +43,10 @@
                 <h3 style="color: green">{{ max_calorie }}</h3>
                 <h4>CALORIES REMAINING</h4>
                 {% if remaining_calories < 0 %}
-                <h3 style="color: red"> {{ remaining_calories }}</h3>
+                    <h3 style="color: red"> {{ remaining_calories }}</h3>
                 {% else %}
-                <h3 style="color: green"> {{ remaining_calories }}</h3>
-                <br>
+                    <h3 style="color: green"> {{ remaining_calories }}</h3>
+                    <br>
                 {% endif %}
             </div>
         </div>

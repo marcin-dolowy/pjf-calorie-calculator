@@ -4,12 +4,12 @@ import urllib.request
 from datetime import date
 
 from flask import Flask, render_template, redirect, url_for, flash, request
-from flask_login import LoginManager, login_user, login_required, logout_user, current_user
-from flask_login import UserMixin
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.sql import func
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from forms import RegistrationForm, LoginForm, RecipeForm
+from forms import RegistrationForm, LoginForm, RecipeForm, FoodForm
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -73,20 +73,20 @@ class Food(db.Model):
     carbohydrates_calories = db.Column(db.Integer)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
-    def __init__(self, name, calories, protein, fat, carbohydrates, protein_calories, fat_calories,
-                 carbohydrates_calories):
-        self.name = name
-        self.calories = calories
-        self.protein = protein
-        self.fat = fat
-        self.carbohydrates = carbohydrates
-        self.protein_calories = protein_calories
-        self.fat_calories = fat_calories
-        self.carbohydrates_calories = carbohydrates_calories
+    # def __init__(self, name, calories, protein, fat, carbohydrates, protein_calories, fat_calories,
+    #              carbohydrates_calories):
+    #     self.name = name
+    #     self.calories = calories
+    #     self.protein = protein
+    #     self.fat = fat
+    #     self.carbohydrates = carbohydrates
+    #     self.protein_calories = protein_calories
+    #     self.fat_calories = fat_calories
+    #     self.carbohydrates_calories = carbohydrates_calories
 
     def __str__(self) -> str:
-        return f"name: {self.name}, calories: {self.calories}, protein: {self.protein}, fat: {self.fat}, " \
-               f"carbohydrates: {self.carbohydrates}"
+        return f"name: {self.name}, calories: {self.calories}, protein: {self.protein_calories}, fat: {self.fat_calories}, " \
+               f"carbohydrates: {self.carbohydrates_calories}"
 
 
 class Recipe(db.Model):
@@ -96,10 +96,10 @@ class Recipe(db.Model):
     image = db.Column(db.String(500), nullable=False)
     ingredients = db.Column(db.String(500), nullable=False)
 
-    def __init(self, products, image, ingredients):
-        self.products = products
-        self.image = image
-        self.ingredients = ingredients
+    # def __init(self, products, image, ingredients):
+    #     self.products = products
+    #     self.image = image
+    #     self.ingredients = ingredients
 
 
 @login_manager.user_loader
@@ -107,60 +107,145 @@ def load_user(user_id):
     return User.query.get(user_id)
 
 
-@app.route("/logout")
+@app.route('/', methods=['GET', 'POST'])
 @login_required
-def logout():
-    logout_user()
-    return redirect(url_for('login'))
-
-
-@app.route('/')
-def start():
-    return render_template("base.html")
-
-
-@app.route("/register", methods=["GET", "POST"])
-def register():
-    form = RegistrationForm()
+def home():
+    form = FoodForm()
     if form.validate_on_submit():
-        user = User(username=form.username.data, firstname=form.firstname.data, lastname=form.lastname.data,
-                    date_of_birth=form.date_of_birth.data, sex=form.sex.data, max_calorie=None, weight=form.weight.data,
-                    height=form.height.data)
-        user.set_password(form.password1.data)
-        user.max_calorie = max_calorie_per_day(user)
-        db.session.add(user)
-        db.session.commit()
-        return redirect(url_for('login'))
+        user_food = load_food(form.name.data)
 
-    return render_template("registration.html", form=form)
+        if user_food['totalNutrients']:
+            food = Food(name=form.name.data, calories=user_food['calories'],
+                        protein=round(user_food["totalNutrients"]["PROCNT"]['quantity'], 2),
+                        fat=round(user_food["totalNutrients"]["FAT"]['quantity'], 2),
+                        carbohydrates=round(user_food["totalNutrients"]["CHOCDF"]['quantity'], 2),
+                        protein_calories=user_food['totalNutrientsKCal']['PROCNT_KCAL']['quantity'],
+                        fat_calories=user_food['totalNutrientsKCal']['FAT_KCAL']['quantity'],
+                        carbohydrates_calories=user_food['totalNutrientsKCal']['CHOCDF_KCAL']['quantity'],
+                        user_id=current_user.id)
+
+            db.session.add(food)
+            db.session.commit()
+            return redirect(url_for('home'))
+
+    all_foods = Food.query.filter(Food.user_id == current_user.id)
+
+    all_protein = Food.query.filter(Food.user_id == current_user.id).with_entities(
+        func.sum(Food.protein).label('total')).first().total
+    all_protein = 0 if all_protein is None else round(all_protein, 2)
+
+    all_fat = Food.query.filter(Food.user_id == current_user.id).with_entities(
+        func.sum(Food.fat).label('total')).first().total or 0
+    all_fat = 0 if all_fat is None else round(all_fat, 2)
+
+    all_carbohydrates = Food.query.filter(Food.user_id == current_user.id).with_entities(
+        func.sum(Food.carbohydrates).label('total')).first().total or 0
+    all_carbohydrates = 0 if all_carbohydrates is None else round(all_carbohydrates, 2)
+
+    all_calories = Food.query.filter(Food.user_id == current_user.id).with_entities(
+        func.sum(Food.calories).label('total')).first().total or 0
+
+    remaining_calories = current_user.max_calorie - all_calories
+
+    name_surname = " ".join([current_user.firstname, current_user.lastname])
+
+    return render_template("home.html", form=form, name_surname=name_surname, max_calorie=current_user.max_calorie,
+                           remaining_calories=remaining_calories, all_foods=all_foods, all_protein=all_protein,
+                           all_fat=all_fat, all_carbohydrates=all_carbohydrates)
+
+
+@app.route('/delete/<int:id>')
+def delete(id):
+    food_to_delete = Food.query.get_or_404(id)
+    print(food_to_delete)
+
+    form = FoodForm()
+
+    all_foods = Food.query.filter(Food.user_id == current_user.id)
+
+    all_protein = Food.query.filter(Food.user_id == current_user.id).with_entities(
+        func.sum(Food.protein).label('total')).first().total
+    all_protein = 0 if all_protein is None else round(all_protein, 2)
+
+    all_fat = Food.query.filter(Food.user_id == current_user.id).with_entities(
+        func.sum(Food.fat).label('total')).first().total or 0
+    all_fat = 0 if all_fat is None else round(all_fat, 2)
+
+    all_carbohydrates = Food.query.filter(Food.user_id == current_user.id).with_entities(
+        func.sum(Food.carbohydrates).label('total')).first().total or 0
+    all_carbohydrates = 0 if all_carbohydrates is None else round(all_carbohydrates, 2)
+
+    all_calories = Food.query.filter(Food.user_id == current_user.id).with_entities(
+        func.sum(Food.calories).label('total')).first().total or 0
+
+    remaining_calories = current_user.max_calorie - all_calories
+
+    name_surname = " ".join([current_user.firstname, current_user.lastname])
+
+    # try:
+    db.session.delete(food_to_delete)
+    db.session.commit()
+    flash("Food was removed successfully!")
+
+    return render_template("home.html", form=form, name_surname=name_surname, max_calorie=current_user.max_calorie,
+                           remaining_calories=remaining_calories, all_foods=all_foods, all_protein=all_protein,
+                           all_fat=all_fat, all_carbohydrates=all_carbohydrates)
+
+    # except:
+    #     flash("There was a problem. Try one's again")
+    #     return render_template("home.html", form=form, name_surname=name_surname,
+    #                            max_calorie=current_user.max_calorie,
+    #                            remaining_calories=remaining_calories,
+    #                            all_foods=all_foods,
+    #                            all_protein=all_protein, all_fat=all_fat,
+    #                            all_carbohydrates=all_carbohydrates)
 
 
 @app.route('/login', methods=["GET", "POST"])
 def login():  # put application's code here
     if not db.engine.has_table('user'):
         db.create_all()
+
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user is not None and user.check_password(form.password.data):
             login_user(user)
             next = request.args.get("next")
-            return redirect(next or url_for("home", username=user.username))
+            return redirect(next or url_for("home"))
         flash('Invalid username or password')
     return render_template("login.html", form=form)
 
 
-@app.route("/home/<username>", methods=['GET', 'POST'])
-def home(username):
-    if not current_user.is_anonymous:
-        user = User.query.filter_by(username=username).first()
-        print(user)
-        return render_template("newhome.html", username=username, calorie=user.max_calorie)
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    form = RegistrationForm()
+
+    if form.validate_on_submit():
+
+        if User.query.filter_by(username=form.username.data).first():
+            flash("Account with this username already exists!")
+            return render_template("registration.html", form=form)
+
+        else:
+            user = User(username=form.username.data, firstname=form.firstname.data, lastname=form.lastname.data,
+                        date_of_birth=form.date_of_birth.data, sex=form.sex.data, max_calorie=None,
+                        weight=form.weight.data,
+                        height=form.height.data)
+            user.set_password(form.password1.data)
+            user.max_calorie = max_calorie_per_day(user)
+            db.session.add(user)
+            db.session.commit()
+            return redirect(url_for('login'))
+
+    return render_template("registration.html", form=form)
 
 
 @app.route("/recipe", methods=['GET', 'POST'])
+@login_required
 def recipe():
     form = RecipeForm()
+
     if form.validate_on_submit():
         Recipe.query.delete()
         recipes = load_recipes(form.products.data)
@@ -179,11 +264,17 @@ def recipe():
 
     all_recipes = Recipe.query.all()
 
-    return render_template("newrecipe.html", form=form, all_recipes=all_recipes)
+    return render_template("recipe.html", form=form, all_recipes=all_recipes)
+
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
 
 
 def calculate_age(born):
-    # born = datetime.datetime.strptime(date_of_born, '%Y-%m-%d')
     today = date.today()
     return today.year - born.year - ((today.month, today.day) < (born.month, born.day))
 
@@ -215,61 +306,3 @@ def load_recipes(products):
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-    # products = load_recipes("chocolate, flour, cacao, egg")
-
-    # jstr = json.dumps(productsa, ensure_ascii=True, indent=4)
-
-    # print(jstr)
-
-    # product = json.dumps(products)
-
-    # print(product)
-
-    # print(products)
-
-    # json_encode = jstr.encode("ascii", "ignore")
-    # json_decode = json_encode.decode()
-
-    # products = json.loads(json_decode)
-
-    # print(json_decode)
-
-    # print(json_good)
-
-    # products = json.loads(jstr)
-
-    #
-    # for x in range(products["to"]):
-    #     print(products["hits"][x]["recipe"]["label"])
-    #     print(products["hits"][x]["recipe"]["image"])
-    #     print(products["hits"][x]["recipe"]["ingredientLines"])
-
-    # food = load_food("100 grams of oatmeal")
-    # with open('data.json', 'w', encoding='utf-8') as f:
-    #     json.dump(food, f, ensure_ascii=False, indent=4)
-
-    # print(food["cautions"])
-
-    # print(food["calories"])
-    # print("fat = ", food["totalNutrients"]["FAT"])
-    # print("wegle = ", food["totalNutrients"]["CHOCDF"])
-    # print("bialko = ", food["totalNutrients"]["PROCNT"])
-    #
-
-    # user = User("admin", "admin", "abc", "abc", date(2000, 5, 14), "Male", None, 90, 178)
-    # user.max_calorie = max_calorie_per_day(user)
-    # print("wiek", calculate_age(user.date_of_birth))
-    # print(user.max_calorie)
-    # print(user)
-    # print(max_calorie_per_day(60, 25, 165))
-
-    # nutrient = [food["calories"], food["totalNutrients"]["FAT"], food["totalNutrients"]["CHOCDF"],
-    #             food["totalNutrients"]["PROCNT"]]
-
-    # plain_password = 'qwerty'
-    # hashed_password = generate_password_hash(plain_password)
-    # submitted_password = 'qwerty'
-    # matching_password = check_password_hash(hashed_password, submitted_password)
-    # print(matching_password)
-    # print(hashed_password)
