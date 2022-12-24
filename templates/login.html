@@ -39,7 +39,9 @@
                             <p>{{ error }}</p>
                         {% endfor %}
                     </div>
-                    <p>{{ form.remember() }} {{ form.remember.label }}</p>
+                    <div style="text-align: left; margin-top: 10px;">
+                        <p>{{ form.remember() }} {{ form.remember.label }}</p>
+                    </div>
                     <p>{{ form.submit(class="btn btn-primary", style="width: 300px;") }}
                     </p>
                     <p style="text-align: center"><a href="{{ url_for('register') }}">Create a new Account!</a></p>
