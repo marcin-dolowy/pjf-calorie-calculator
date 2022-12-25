@@ -1,1 +1,35 @@
 {% extends 'base.html' %}
+
+{% block content %}
+
+    <div class="container text-center">
+        <div class="row">
+            <div class="col-sm-8">
+                <img src="/static/images/food.jpg" alt="food" width="700" height="533">
+            </div>
+
+            <div class="col-sm-4">
+                <div>
+                    <h1>Good health begins with what you eat.</h1>
+                </div>
+                <br>
+
+                <div>
+                    <p style="text-align: left">Want to eat more mindfully? Monitor your meals, learn about your habits
+                        and
+                        achieve your goals with the HealthyEats app.
+                    </p>
+                    <br>
+                    <h4 style="text-align: left">Find your favorite recipe by typing in just a few ingredients
+                    </h4>
+                </div>
+                <br>
+                <div>
+                    <a class="btn btn-primary btn-lg" href="{{ url_for('register') }}">START USING FOR FREE</a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

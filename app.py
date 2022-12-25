@@ -96,6 +96,7 @@ def load_user(user_id):
 def start_page():
     return render_template('start_page.html')
 
+
 @app.route('/home', methods=['GET', 'POST'])
 @login_required
 def home():
