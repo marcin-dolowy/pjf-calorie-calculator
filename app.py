@@ -117,6 +117,8 @@ def home():
             db.session.add(food)
             db.session.commit()
             return redirect(url_for('home'))
+        else:
+            flash("Food not found!")
 
     name_surname = " ".join([current_user.firstname, current_user.lastname])
 
@@ -150,7 +152,6 @@ def delete(food_id):
     db.session.delete(food_to_delete)
     db.session.commit()
     flash("Food was removed successfully!")
-
     return redirect(url_for('home'))
 
 
@@ -214,18 +215,22 @@ def recipe():
     if form.validate_on_submit():
         Recipe.query.delete()
         recipes = load_recipes(form.products.data)
-        print(recipes["to"])
-        for x in range(recipes["to"]):
-            ingredients_list = recipes["hits"][x]["recipe"]["ingredientLines"]
-            ingredients_str = '\n'.join(str(x) for x in ingredients_list)
-            ingredients_str = ingredients_str.replace('\n', '<br />')
 
-            new_recipe = Recipe(name=recipes["hits"][x]["recipe"]["label"], products=form.products.data,
-                                image=recipes["hits"][x]["recipe"]["image"], ingredients=ingredients_str)
-            db.session.add(new_recipe)
-            db.session.commit()
+        if recipes['count'] == 0:
+            flash("Recipes not found! Try again")
 
-        return redirect('/recipe')
+        else:
+            for x in range(recipes["to"]):
+                ingredients_list = recipes["hits"][x]["recipe"]["ingredientLines"]
+                ingredients_str = '\n'.join(str(x) for x in ingredients_list)
+                ingredients_str = ingredients_str.replace('\n', '<br />')
+
+                new_recipe = Recipe(name=recipes["hits"][x]["recipe"]["label"], products=form.products.data,
+                                    image=recipes["hits"][x]["recipe"]["image"], ingredients=ingredients_str)
+                db.session.add(new_recipe)
+                db.session.commit()
+
+            return redirect('/recipe')
 
     all_recipes = Recipe.query.all()
 
