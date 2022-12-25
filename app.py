@@ -14,8 +14,7 @@ from forms import RegistrationForm, LoginForm, RecipeForm, FoodForm
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = \
-    'sqlite:///' + os.path.join(basedir, 'models.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'models.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 SECRET_KEY = os.urandom(32)

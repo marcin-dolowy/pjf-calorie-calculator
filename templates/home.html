@@ -8,6 +8,7 @@
                 <h2>Hello!</h2>
                 <div>
                     <h3> {{ name_surname }}</h3>
+                    <hr>
                 </div>
                 {% for message in get_flashed_messages() %}
                     <p style="color: red;">{{ message }}</p>
