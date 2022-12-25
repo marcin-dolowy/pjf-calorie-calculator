@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, DateField, RadioField, IntegerField
 
-from wtforms.validators import DataRequired, Email, EqualTo
+from wtforms.validators import DataRequired, EqualTo
 
 
 class RegistrationForm(FlaskForm):
@@ -32,5 +32,3 @@ class RecipeForm(FlaskForm):
 class FoodForm(FlaskForm):
     name = StringField("Name", validators=[DataRequired()])
     submit = SubmitField('Search')
-
-
