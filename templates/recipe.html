@@ -43,6 +43,11 @@
                 </div>
             </div>
         {% endfor %}
+
+        {% for message in get_flashed_messages() %}
+            <p style="color: red;">Error : {{ message }}</p>
+        {% endfor %}
+
     </div>
 
 {% endblock %}
