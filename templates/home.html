@@ -75,7 +75,8 @@
                             <td> {{ food.fat }}</td>
                             <td>{{ food.carbohydrates }}</td>
                             <td>
-                                <a href="{{ url_for('delete', food_id=food.id) }}" class="btn btn-danger">Remove</a>
+                                <a href="{{ url_for('delete', food_id=food.id) }}"
+                                   class="btn btn-outline-danger">Remove</a>
                             </td>
                         </tr>
                     {% endfor %}

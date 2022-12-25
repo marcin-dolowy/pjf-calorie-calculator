@@ -56,7 +56,7 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password, password)
 
     def __str__(self) -> str:
-        return f"username: {self.username}, password: {self.password}, name: {self.firstname}, " \
+        return f"id: {self.id}, username: {self.username}, password: {self.password}, name: {self.firstname}, " \
                f"surname: {self.lastname},"f"sex: {self.sex}, max_calorie: {self.max_calorie}, " \
                f"weight: {self.weight}, height: {self.height}"
 
