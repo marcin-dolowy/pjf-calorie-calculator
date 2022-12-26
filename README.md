@@ -1,6 +1,9 @@
 # Calorie Calculator & Recipe Finder
 
-### 🎓 Homework made as a part of Functional Programming course for [Military University of Technology](https://wcy.wat.edu.pl/)
+### 🎓 Homework
+
+The project made as a part of Functional Programming course
+for [Military University of Technology](https://wcy.wat.edu.pl/)
 
 ## 📖 Description
 
@@ -36,6 +39,7 @@ $ pip install -r requirements.txt
 - Recipe founder by typing in ingredients
 
 ## 🧑‍💻 Technologies used
+
 - Python 3.11
 - Flask 2.2
 - HTML
