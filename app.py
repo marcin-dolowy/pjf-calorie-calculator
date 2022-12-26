@@ -123,28 +123,38 @@ def home():
 
     name_surname = " ".join([current_user.firstname, current_user.lastname])
 
-    all_calories = Food.query.filter(Food.user_id == current_user.id).with_entities(
-        func.sum(Food.calories).label('total')).first().total or 0
-
-    remaining_calories = current_user.max_calorie - all_calories
-
-    all_foods = Food.query.filter(Food.user_id == current_user.id)
-
-    all_protein = Food.query.filter(Food.user_id == current_user.id).with_entities(
-        func.sum(Food.protein).label('total')).first().total
-    all_protein = 0 if all_protein is None else round(all_protein, 2)
-
-    all_fat = Food.query.filter(Food.user_id == current_user.id).with_entities(
-        func.sum(Food.fat).label('total')).first().total or 0
-    all_fat = 0 if all_fat is None else round(all_fat, 2)
-
-    all_carbohydrates = Food.query.filter(Food.user_id == current_user.id).with_entities(
-        func.sum(Food.carbohydrates).label('total')).first().total or 0
-    all_carbohydrates = 0 if all_carbohydrates is None else round(all_carbohydrates, 2)
+    remaining_calories = current_user.max_calorie - count_all_calories()
 
     return render_template("home.html", form=form, name_surname=name_surname, max_calorie=current_user.max_calorie,
-                           remaining_calories=remaining_calories, all_foods=all_foods, all_protein=all_protein,
-                           all_fat=all_fat, all_carbohydrates=all_carbohydrates, user=current_user)
+                           remaining_calories=remaining_calories, all_foods=all_foods(), all_protein=all_protein(),
+                           all_fat=all_fat(), all_carbohydrates=all_carbohydrates(), user=current_user)
+
+
+def count_all_calories():
+    return Food.query.filter(Food.user_id == current_user.id).with_entities(
+        func.sum(Food.calories).label('total')).first().total or 0
+
+
+def all_foods():
+    return Food.query.filter(Food.user_id == current_user.id)
+
+
+def all_protein():
+    total_protein = Food.query.filter(Food.user_id == current_user.id).with_entities(
+        func.sum(Food.protein).label('total')).first().total
+    return 0 if total_protein is None else round(total_protein, 2)
+
+
+def all_fat():
+    total_fat = Food.query.filter(Food.user_id == current_user.id).with_entities(
+        func.sum(Food.fat).label('total')).first().total or 0
+    return 0 if total_fat is None else round(total_fat, 2)
+
+
+def all_carbohydrates():
+    total_carbohydrates = Food.query.filter(Food.user_id == current_user.id).with_entities(
+        func.sum(Food.carbohydrates).label('total')).first().total or 0
+    return 0 if total_carbohydrates is None else round(total_carbohydrates, 2)
 
 
 @app.route('/delete/<int:food_id>')
