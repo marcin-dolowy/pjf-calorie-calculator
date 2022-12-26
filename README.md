@@ -27,7 +27,7 @@ To run this project locally:
   command:
 
 ```shell
-$ pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 
 ## ✨ Features
