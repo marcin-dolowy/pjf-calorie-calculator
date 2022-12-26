@@ -1,9 +1,8 @@
 # Calorie Calculator & Recipe Finder
 
-### 🎓 Homework
+## 🎓 Homework
 
-The project made as a part of Functional Programming course
-for [Military University of Technology](https://wcy.wat.edu.pl/)
+### The project made as a part of Functional Programming course for [Military University of Technology](https://wcy.wat.edu.pl/)
 
 ## 📖 Description
 
