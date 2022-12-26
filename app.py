@@ -93,6 +93,8 @@ def load_user(user_id):
 
 @app.route('/')
 def start_page():
+    if not db.engine.has_table('user'):
+        db.create_all()
     return render_template('start_page.html')
 
 
@@ -169,9 +171,6 @@ def delete_account():
 
 @app.route('/login', methods=["GET", "POST"])
 def login():
-    if not db.engine.has_table('user'):
-        db.create_all()
-
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
