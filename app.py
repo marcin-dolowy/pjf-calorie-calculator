@@ -28,15 +28,15 @@ db = SQLAlchemy(app)
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(50), unique=True)
-    password = db.Column(db.String(150))
-    firstname = db.Column(db.String(50))
-    lastname = db.Column(db.String(50))
-    date_of_birth = db.Column(db.DateTime())
-    sex = db.Column(db.String(10))
-    max_calorie = db.Column(db.Float(precision=2))
-    weight = db.Column(db.Integer)
-    height = db.Column(db.Integer)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    password = db.Column(db.String(150), nullable=False)
+    firstname = db.Column(db.String(50), nullable=False)
+    lastname = db.Column(db.String(50), nullable=False)
+    date_of_birth = db.Column(db.DateTime(), nullable=False)
+    sex = db.Column(db.String(10), nullable=False)
+    max_calorie = db.Column(db.Float, nullable=False)
+    weight = db.Column(db.Integer, nullable=False)
+    height = db.Column(db.Integer, nullable=False)
     foods = db.relationship("Food", backref='user')
 
     def __init__(self, username, firstname, lastname, date_of_birth, sex, max_calorie, weight, height):
@@ -63,14 +63,14 @@ class User(UserMixin, db.Model):
 
 class Food(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50))
-    calories = db.Column(db.Integer)
-    protein = db.Column(db.Numeric(10, 2), default=0)
-    fat = db.Column(db.Numeric(10, 2), default=0)
-    carbohydrates = db.Column(db.Numeric(10, 2), default=0)
-    protein_calories = db.Column(db.Numeric(10, 2), default=0)
-    fat_calories = db.Column(db.Numeric(10, 2), default=0)
-    carbohydrates_calories = db.Column(db.Numeric(10, 2), default=0)
+    name = db.Column(db.String(50), nullable=False)
+    calories = db.Column(db.Integer, nullable=False)
+    protein = db.Column(db.Float, default=0, nullable=False)
+    fat = db.Column(db.Float, default=0)
+    carbohydrates = db.Column(db.Float, default=0)
+    protein_calories = db.Column(db.Float, default=0)
+    fat_calories = db.Column(db.Float, default=0)
+    carbohydrates_calories = db.Column(db.Float, default=0)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     def __str__(self) -> str:
@@ -107,9 +107,9 @@ def home():
 
         if user_food['totalNutrients']:
             food = Food(name=form.name.data, calories=user_food['calories'],
-                        protein=user_food["totalNutrients"]["PROCNT"]['quantity'],
-                        fat=user_food["totalNutrients"]["FAT"]['quantity'],
-                        carbohydrates=user_food["totalNutrients"]["CHOCDF"]['quantity'],
+                        protein=round(user_food["totalNutrients"]["PROCNT"]['quantity'], 2),
+                        fat=round(user_food["totalNutrients"]["FAT"]['quantity'], 2),
+                        carbohydrates=round(user_food["totalNutrients"]["CHOCDF"]['quantity'], 2),
                         protein_calories=user_food['totalNutrientsKCal']['PROCNT_KCAL']['quantity'],
                         fat_calories=user_food['totalNutrientsKCal']['FAT_KCAL']['quantity'],
                         carbohydrates_calories=user_food['totalNutrientsKCal']['CHOCDF_KCAL']['quantity'],
