@@ -65,12 +65,12 @@ class Food(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50))
     calories = db.Column(db.Integer)
-    protein = db.Column(db.Integer)
-    fat = db.Column(db.Integer)
-    carbohydrates = db.Column(db.Integer)
-    protein_calories = db.Column(db.Integer)
-    fat_calories = db.Column(db.Integer)
-    carbohydrates_calories = db.Column(db.Integer)
+    protein = db.Column(db.Numeric(10, 2), default=0)
+    fat = db.Column(db.Numeric(10, 2), default=0)
+    carbohydrates = db.Column(db.Numeric(10, 2), default=0)
+    protein_calories = db.Column(db.Numeric(10, 2), default=0)
+    fat_calories = db.Column(db.Numeric(10, 2), default=0)
+    carbohydrates_calories = db.Column(db.Numeric(10, 2), default=0)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     def __str__(self) -> str:
@@ -107,9 +107,9 @@ def home():
 
         if user_food['totalNutrients']:
             food = Food(name=form.name.data, calories=user_food['calories'],
-                        protein=round(user_food["totalNutrients"]["PROCNT"]['quantity'], 2),
-                        fat=round(user_food["totalNutrients"]["FAT"]['quantity'], 2),
-                        carbohydrates=round(user_food["totalNutrients"]["CHOCDF"]['quantity'], 2),
+                        protein=user_food["totalNutrients"]["PROCNT"]['quantity'],
+                        fat=user_food["totalNutrients"]["FAT"]['quantity'],
+                        carbohydrates=user_food["totalNutrients"]["CHOCDF"]['quantity'],
                         protein_calories=user_food['totalNutrientsKCal']['PROCNT_KCAL']['quantity'],
                         fat_calories=user_food['totalNutrientsKCal']['FAT_KCAL']['quantity'],
                         carbohydrates_calories=user_food['totalNutrientsKCal']['CHOCDF_KCAL']['quantity'],
