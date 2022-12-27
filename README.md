@@ -21,7 +21,7 @@ recipe finder. Application uses Edemam's Nutrition Analysis API and Edemam's Rec
 
 ## 🚀 Getting started
 
-To run this project locally:
+To adding all modules and packages required for this project:
 
 - Open up a terminal and navigate to the directory of your Python project. Once you are there, type the following
   command:
