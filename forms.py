@@ -33,4 +33,4 @@ class RecipeForm(FlaskForm):
 
 class FoodForm(FlaskForm):
     name = StringField("Name", validators=[DataRequired()])
-    submit = SubmitField('Search')
+    submit = SubmitField('Add food')

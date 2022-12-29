@@ -101,19 +101,18 @@ def start_page():
     return render_template('start_page.html')
 
 
-def get_request_values_if_present():
+def get_request_value_if_present():
     if len(request.values.keys()) == 0:
-        date1 = date.today()
+        current_date = date.today()
     else:
-        date1 = datetime.datetime.strptime(request.values.get('current_date'), '%Y-%m-%d').date()
-        print(date1)
-    return date1
+        current_date = datetime.datetime.strptime(request.values.get('current_date'), '%Y-%m-%d').date()
+    return current_date
 
 
 @app.route('/home/', methods=['GET', 'POST'])
 @login_required
 def home():
-    current_date = get_request_values_if_present()
+    current_date = get_request_value_if_present()
 
     if request.values.get('button') == 'prev':
         current_date = current_date - datetime.timedelta(days=1)
@@ -145,47 +144,47 @@ def home():
 
     name_surname = " ".join([current_user.firstname, current_user.lastname])
 
-    remaining_calories = current_user.max_calorie - count_all_calories()
-
-    all_foods = Food.query.filter_by(user_id=current_user.id).filter_by(
-        date_of_add=datetime.datetime(current_date.year, current_date.month, current_date.day)).all()
-
-    all_protein = Food.query.filter_by(user_id=current_user.id,
-                                       date_of_add=datetime.datetime(current_date.year, current_date.month,
-                                                                     current_date.day)).with_entities(
-        func.sum(Food.protein).label('total')).first().total
-
-    all_protein = 0 if all_protein is None else round(all_protein, 2)
+    remaining_calories = current_user.max_calorie - count_all_calories(current_date)
 
     return render_template("home.html", form=form, name_surname=name_surname, max_calorie=current_user.max_calorie,
-                           remaining_calories=remaining_calories, all_foods=all_foods, all_protein=all_protein,
-                           all_fat=all_fat(), all_carbohydrates=all_carbohydrates(), user=current_user,
+                           remaining_calories=remaining_calories, all_foods=all_foods(current_date),
+                           all_protein=all_protein(current_date), all_fat=all_fat(current_date),
+                           all_carbohydrates=all_carbohydrates(current_date), user=current_user,
                            current_date=current_date)
 
 
-def count_all_calories():
-    return Food.query.filter(Food.user_id == current_user.id).with_entities(
+def count_all_calories(current_date):
+    return Food.query.filter_by(user_id=current_user.id,
+                                date_of_add=datetime.datetime(current_date.year, current_date.month,
+                                                              current_date.day)).with_entities(
         func.sum(Food.calories).label('total')).first().total or 0
 
 
-# def all_foods():
-#     return Food.query.filter(Food.user_id == current_user.id)
+def all_foods(current_date):
+    return Food.query.filter_by(user_id=current_user.id).filter_by(
+        date_of_add=datetime.datetime(current_date.year, current_date.month, current_date.day)).all()
 
 
-# def all_protein():
-#     total_protein = Food.query.filter_by(user_id=current_user.id, ).with_entities(
-#         func.sum(Food.protein).label('total')).first().total
-#     return 0 if total_protein is None else round(total_protein, 2)
+def all_protein(current_date):
+    total_protein = Food.query.filter_by(user_id=current_user.id,
+                                         date_of_add=datetime.datetime(current_date.year, current_date.month,
+                                                                       current_date.day)).with_entities(
+        func.sum(Food.protein).label('total')).first().total
+    return 0 if total_protein is None else round(total_protein, 2)
 
 
-def all_fat():
-    total_fat = Food.query.filter(Food.user_id == current_user.id).with_entities(
+def all_fat(current_date):
+    total_fat = Food.query.filter_by(user_id=current_user.id,
+                                     date_of_add=datetime.datetime(current_date.year, current_date.month,
+                                                                   current_date.day)).with_entities(
         func.sum(Food.fat).label('total')).first().total or 0
     return 0 if total_fat is None else round(total_fat, 2)
 
 
-def all_carbohydrates():
-    total_carbohydrates = Food.query.filter(Food.user_id == current_user.id).with_entities(
+def all_carbohydrates(current_date):
+    total_carbohydrates = Food.query.filter_by(user_id=current_user.id,
+                                               date_of_add=datetime.datetime(current_date.year, current_date.month,
+                                                                             current_date.day)).with_entities(
         func.sum(Food.carbohydrates).label('total')).first().total or 0
     return 0 if total_carbohydrates is None else round(total_carbohydrates, 2)
 
@@ -251,6 +250,9 @@ def register():
 @app.route("/recipe", methods=['GET', 'POST'])
 @login_required
 def recipe():
+
+    current_date = get_request_value_if_present()
+
     form = RecipeForm()
 
     if form.validate_on_submit():
@@ -275,7 +277,7 @@ def recipe():
 
     all_recipes = Recipe.query.all()
 
-    return render_template("recipe.html", form=form, all_recipes=all_recipes)
+    return render_template("recipe.html", form=form, all_recipes=all_recipes, current_date=current_date)
 
 
 @app.route("/logout")

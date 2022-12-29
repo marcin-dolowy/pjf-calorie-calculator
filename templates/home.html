@@ -56,21 +56,21 @@
             <div class="col-8">
 
 
-                <div style="border-style: solid; width: 100%; text-align: center">
+                <div style="width: 100%; text-align: center">
 
                     <div style="display: inline-block">
-                        <a type="button" class="btn btn-primary"
+                        <a type="button" class="btn btn-outline-success" style="width: 150px"
                            href="{{ url_for('home', current_date=current_date, button='prev') }}">
                             Previous Day
                         </a>
                     </div>
 
                     <div style="display: inline-block">
-                        <a> {{ current_date }}</a>
+                        <h5> {{ current_date }}</h5>
                     </div>
 
                     <div style="display: inline-block">
-                        <a type="button" class="btn btn-primary"
+                        <a type="button" class="btn btn-outline-success" style="width: 150px"
                            href="{{ url_for('home', current_date=current_date, button='next') }}">
                             Next Day
                         </a>
