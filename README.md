@@ -27,7 +27,7 @@ To adding all modules and packages required for this project:
   command:
 
 ```shell
-pip install -r requirements.txt
+$ pip install -r requirements.txt
 ```
 
 ## ✨ Features
