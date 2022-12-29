@@ -98,7 +98,9 @@ def start_page():
     if not db.engine.has_table('user'):
         db.create_all()
 
-    return render_template('start_page.html')
+    current_date = get_request_value_if_present()
+
+    return render_template('start_page.html', current_date=current_date)
 
 
 def get_request_value_if_present():
@@ -109,7 +111,7 @@ def get_request_value_if_present():
     return current_date
 
 
-@app.route('/home/', methods=['GET', 'POST'])
+@app.route('/home', methods=['GET', 'POST'])
 @login_required
 def home():
     current_date = get_request_value_if_present()
@@ -250,9 +252,6 @@ def register():
 @app.route("/recipe", methods=['GET', 'POST'])
 @login_required
 def recipe():
-
-    current_date = get_request_value_if_present()
-
     form = RecipeForm()
 
     if form.validate_on_submit():
@@ -261,6 +260,7 @@ def recipe():
 
         if recipes['count'] == 0:
             flash("Recipes not found! Try again")
+            return redirect(url_for('recipe'))
 
         else:
             for x in range(recipes["to"]):
@@ -273,11 +273,12 @@ def recipe():
                 db.session.add(new_recipe)
                 db.session.commit()
 
-            return redirect('/recipe')
+            return redirect(url_for('recipe'))
 
     all_recipes = Recipe.query.all()
 
-    return render_template("recipe.html", form=form, all_recipes=all_recipes, current_date=current_date)
+    return render_template("recipe.html", form=form, all_recipes=all_recipes,
+                           current_date=get_request_value_if_present())
 
 
 @app.route("/logout")

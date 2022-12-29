@@ -14,6 +14,9 @@
                 {{ form.hidden_tag() }}
 
                 <div class="col" align="center">
+                    {% for message in get_flashed_messages() %}
+                        <p style="color: red;">Error : {{ message }}</p>
+                    {% endfor %}
                     <br>
                     {{ form.products(placeholder="e.g. chocolate, flour, cacao, egg", class="form-control", style="width: 600px") }}
 
@@ -43,11 +46,6 @@
                 </div>
             </div>
         {% endfor %}
-
-        {% for message in get_flashed_messages() %}
-            <p style="color: red;">Error : {{ message }}</p>
-        {% endfor %}
-
     </div>
 
 {% endblock %}
