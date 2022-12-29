@@ -55,6 +55,31 @@
 
             <div class="col-8">
 
+
+                <div style="border-style: solid; width: 100%; text-align: center">
+
+                    <div style="display: inline-block">
+                        <a type="button" class="btn btn-primary"
+                           href="{{ url_for('home', current_date=current_date, button='prev') }}">
+                            Previous Day
+                        </a>
+                    </div>
+
+                    <div style="display: inline-block">
+                        <a> {{ current_date }}</a>
+                    </div>
+
+                    <div style="display: inline-block">
+                        <a type="button" class="btn btn-primary"
+                           href="{{ url_for('home', current_date=current_date, button='next') }}">
+                            Next Day
+                        </a>
+                    </div>
+
+                </div>
+
+                <br>
+
                 <table class="table table-bordered">
                     <thead>
                     <tr>
@@ -109,16 +134,5 @@
             </div>
         </div>
     </div>
-
-    {#    <script>#}
-    {#        function removeRow(button) {#}
-    {#            var row = button.parentNode.parentNode;#}
-    {#            var table = row.parentNode;#}
-    {#            table.removeChild(row);#}
-    {#        }#}
-    {#    </script>#}
-
-    {#<button class="btn btn-danger" type="button" name="remove" onclick="removeRow(this)">Remove#}
-    {#                                </button>#}
 
 {% endblock %}

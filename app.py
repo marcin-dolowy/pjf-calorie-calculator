@@ -1,3 +1,4 @@
+import datetime
 import json
 import os
 import urllib.request
@@ -56,13 +57,14 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password, password)
 
     def __str__(self) -> str:
-        return f"id: {self.id}, username: {self.username}, password: {self.password}, name: {self.firstname}, " \
-               f"surname: {self.lastname},"f"sex: {self.sex}, max_calorie: {self.max_calorie}, " \
-               f"weight: {self.weight}, height: {self.height}"
+        return f"id: {self.id}, username: {self.username}, password: {self.password}, firstname: {self.firstname}, " \
+               f"lastname: {self.lastname}, date_of_birth: {self.date_of_birth}, sex: {self.sex}, max_calorie: " \
+               f"{self.max_calorie}, weight: {self.weight}, height: {self.height}"
 
 
 class Food(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    date_of_add = db.Column(db.DateTime(), nullable=False)
     name = db.Column(db.String(50), nullable=False)
     calories = db.Column(db.Integer, nullable=False)
     protein = db.Column(db.Float, default=0, nullable=False)
@@ -95,18 +97,38 @@ def load_user(user_id):
 def start_page():
     if not db.engine.has_table('user'):
         db.create_all()
+
     return render_template('start_page.html')
 
 
-@app.route('/home', methods=['GET', 'POST'])
+def get_request_values_if_present():
+    if len(request.values.keys()) == 0:
+        date1 = date.today()
+    else:
+        date1 = datetime.datetime.strptime(request.values.get('current_date'), '%Y-%m-%d').date()
+        print(date1)
+    return date1
+
+
+@app.route('/home/', methods=['GET', 'POST'])
 @login_required
 def home():
+    current_date = get_request_values_if_present()
+
+    if request.values.get('button') == 'prev':
+        current_date = current_date - datetime.timedelta(days=1)
+        return redirect(url_for('home', current_date=current_date))
+    elif request.values.get('button') == 'next':
+        current_date = current_date + datetime.timedelta(days=1)
+        return redirect(url_for('home', current_date=current_date))
+
     form = FoodForm()
     if form.validate_on_submit():
+
         user_food = load_food(form.name.data)
 
         if user_food['totalNutrients']:
-            food = Food(name=form.name.data, calories=user_food['calories'],
+            food = Food(date_of_add=current_date, name=form.name.data, calories=user_food['calories'],
                         protein=round(user_food["totalNutrients"]["PROCNT"]['quantity'], 2),
                         fat=round(user_food["totalNutrients"]["FAT"]['quantity'], 2),
                         carbohydrates=round(user_food["totalNutrients"]["CHOCDF"]['quantity'], 2),
@@ -117,7 +139,7 @@ def home():
 
             db.session.add(food)
             db.session.commit()
-            return redirect(url_for('home'))
+            return redirect(url_for('home', current_date=current_date))
         else:
             flash("Food not found!")
 
@@ -125,9 +147,20 @@ def home():
 
     remaining_calories = current_user.max_calorie - count_all_calories()
 
+    all_foods = Food.query.filter_by(user_id=current_user.id).filter_by(
+        date_of_add=datetime.datetime(current_date.year, current_date.month, current_date.day)).all()
+
+    all_protein = Food.query.filter_by(user_id=current_user.id,
+                                       date_of_add=datetime.datetime(current_date.year, current_date.month,
+                                                                     current_date.day)).with_entities(
+        func.sum(Food.protein).label('total')).first().total
+
+    all_protein = 0 if all_protein is None else round(all_protein, 2)
+
     return render_template("home.html", form=form, name_surname=name_surname, max_calorie=current_user.max_calorie,
-                           remaining_calories=remaining_calories, all_foods=all_foods(), all_protein=all_protein(),
-                           all_fat=all_fat(), all_carbohydrates=all_carbohydrates(), user=current_user)
+                           remaining_calories=remaining_calories, all_foods=all_foods, all_protein=all_protein,
+                           all_fat=all_fat(), all_carbohydrates=all_carbohydrates(), user=current_user,
+                           current_date=current_date)
 
 
 def count_all_calories():
@@ -135,14 +168,14 @@ def count_all_calories():
         func.sum(Food.calories).label('total')).first().total or 0
 
 
-def all_foods():
-    return Food.query.filter(Food.user_id == current_user.id)
+# def all_foods():
+#     return Food.query.filter(Food.user_id == current_user.id)
 
 
-def all_protein():
-    total_protein = Food.query.filter(Food.user_id == current_user.id).with_entities(
-        func.sum(Food.protein).label('total')).first().total
-    return 0 if total_protein is None else round(total_protein, 2)
+# def all_protein():
+#     total_protein = Food.query.filter_by(user_id=current_user.id, ).with_entities(
+#         func.sum(Food.protein).label('total')).first().total
+#     return 0 if total_protein is None else round(total_protein, 2)
 
 
 def all_fat():
@@ -163,7 +196,7 @@ def delete(food_id):
     db.session.delete(food_to_delete)
     db.session.commit()
     flash("Food was removed successfully!")
-    return redirect(url_for('home'))
+    return redirect(url_for('home', current_date=food_to_delete.date_of_add.date()))
 
 
 @app.route('/delete_account')
@@ -187,7 +220,7 @@ def login():
         if user is not None and user.check_password(form.password.data):
             login_user(user)
             next = request.args.get("next")
-            return redirect(next or url_for("home"))
+            return redirect(next or f'/home?current_date={date.today()}')
         flash('Invalid username or password')
     return render_template("login.html", form=form)
 
