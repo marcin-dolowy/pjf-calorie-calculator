@@ -77,7 +77,7 @@ class Food(db.Model):
 
     def __str__(self) -> str:
         return f"name: {self.name}, calories: {self.calories}, protein: {self.protein_calories}, " \
-               f"fat: {self.fat_calories}, "f"carbohydrates: {self.carbohydrates_calories}"
+               f"fat: {self.fat_calories}, carbohydrates: {self.carbohydrates_calories}"
 
 
 class Recipe(db.Model):
@@ -103,12 +103,47 @@ def start_page():
     return render_template('start_page.html', current_date=current_date)
 
 
-def get_request_value_if_present():
-    if len(request.values.keys()) == 0:
-        current_date = date.today()
-    else:
-        current_date = datetime.datetime.strptime(request.values.get('current_date'), '%Y-%m-%d').date()
-    return current_date
+@app.route('/login', methods=["GET", "POST"])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=form.username.data).first()
+        if user is not None and user.check_password(form.password.data):
+            login_user(user)
+            next = request.args.get("next")
+            return redirect(next or url_for('home', current_date=date.today()))
+        flash('Invalid username or password')
+    return render_template("login.html", form=form)
+
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    form = RegistrationForm()
+
+    if form.validate_on_submit():
+
+        if User.query.filter_by(username=form.username.data).first():
+            flash("Account with this username already exists!")
+            return render_template("registration.html", form=form)
+
+        else:
+            user = User(username=form.username.data, firstname=form.firstname.data, lastname=form.lastname.data,
+                        date_of_birth=form.date_of_birth.data, sex=form.sex.data, max_calorie=None,
+                        weight=form.weight.data, height=form.height.data)
+            user.set_password(form.password1.data)
+            user.max_calorie = max_calorie_per_day(user)
+            db.session.add(user)
+            db.session.commit()
+            return redirect(url_for('login'))
+
+    return render_template("registration.html", form=form)
+
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
 
 
 @app.route('/home', methods=['GET', 'POST'])
@@ -213,42 +248,6 @@ def delete_account():
     return redirect(url_for('login'))
 
 
-@app.route('/login', methods=["GET", "POST"])
-def login():
-    form = LoginForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
-        if user is not None and user.check_password(form.password.data):
-            login_user(user)
-            next = request.args.get("next")
-            return redirect(next or f'/home?current_date={date.today()}')
-        flash('Invalid username or password')
-    return render_template("login.html", form=form)
-
-
-@app.route("/register", methods=["GET", "POST"])
-def register():
-    form = RegistrationForm()
-
-    if form.validate_on_submit():
-
-        if User.query.filter_by(username=form.username.data).first():
-            flash("Account with this username already exists!")
-            return render_template("registration.html", form=form)
-
-        else:
-            user = User(username=form.username.data, firstname=form.firstname.data, lastname=form.lastname.data,
-                        date_of_birth=form.date_of_birth.data, sex=form.sex.data, max_calorie=None,
-                        weight=form.weight.data, height=form.height.data)
-            user.set_password(form.password1.data)
-            user.max_calorie = max_calorie_per_day(user)
-            db.session.add(user)
-            db.session.commit()
-            return redirect(url_for('login'))
-
-    return render_template("registration.html", form=form)
-
-
 @app.route("/recipe", methods=['GET', 'POST'])
 @login_required
 def recipe():
@@ -281,11 +280,12 @@ def recipe():
                            current_date=get_request_value_if_present())
 
 
-@app.route("/logout")
-@login_required
-def logout():
-    logout_user()
-    return redirect(url_for('login'))
+def get_request_value_if_present():
+    if len(request.values.keys()) == 0:
+        current_date = date.today()
+    else:
+        current_date = datetime.datetime.strptime(request.values.get('current_date'), '%Y-%m-%d').date()
+    return current_date
 
 
 def calculate_age(born):
