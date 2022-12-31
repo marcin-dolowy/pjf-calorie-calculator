@@ -40,8 +40,11 @@ $ pip install -r requirements.txt
 ## 🧑‍💻 Technologies used
 
 - Python 3.11
-- Flask 2.2
+- Flask 2.2.2
+- Jinja2 3.1.2
+- WTForms 3.0.1
 - HTML
+- Pillow
 - Bootstrap 5.2.3
 - SQLite
 - SQLAlchemy
