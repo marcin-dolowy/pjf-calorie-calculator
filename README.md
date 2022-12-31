@@ -44,7 +44,6 @@ $ pip install -r requirements.txt
 - Jinja2 3.1.2
 - WTForms 3.0.1
 - HTML
-- Pillow
 - Bootstrap 5.2.3
 - SQLite
 - SQLAlchemy
